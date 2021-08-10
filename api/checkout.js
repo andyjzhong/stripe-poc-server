@@ -1,0 +1,26 @@
+const stripeApi = require('./stripe');
+
+async function createCheckoutSessions(req, res) {
+    const domainUrl = process.env.WEB_APP_URL;
+    const { line_items, customer_email } = req.body;
+
+    if(!line_items || !customer_email) {
+        return res.status(400).json({ error: '### Missing required session parameters ###' })
+    }
+
+    let session;
+
+    try {
+        session = await stripeAPI.checkout.sessions.create({
+            payment_methods_types: ['card'],
+            mode: "payment",
+            line_items,
+            customer_email,
+            success_url: `${domainUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${domainUrl}/cancel`,
+            shipping_addess_collection: { allowed_countries: ['US']}
+        })
+    } catch (error) {
+
+    }
+}
