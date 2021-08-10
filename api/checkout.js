@@ -1,6 +1,6 @@
-const stripeApi = require('./stripe');
+const stripeAPI = require('../stripe');
 
-async function createCheckoutSessions(req, res) {
+async function createCheckoutSession(req, res) {
     const domainUrl = process.env.WEB_APP_URL;
     const { line_items, customer_email } = req.body;
 
@@ -12,15 +12,20 @@ async function createCheckoutSessions(req, res) {
 
     try {
         session = await stripeAPI.checkout.sessions.create({
-            payment_methods_types: ['card'],
+            payment_method_types: ['card'],
             mode: "payment",
             line_items,
             customer_email,
             success_url: `${domainUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domainUrl}/cancel`,
-            shipping_addess_collection: { allowed_countries: ['US']}
+            shipping_address_collection: { allowed_countries: ['GB', 'US']}
         })
-    } catch (error) {
 
+        res.status(200).json({ sessionId: session.id, });
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({ error: "An error occured. Unable to create a session." })
     }
 }
+
+module.exports = createCheckoutSession;
